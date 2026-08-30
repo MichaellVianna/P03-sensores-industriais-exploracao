@@ -1,97 +1,82 @@
-# P03 — Explorando dados de sensores industriais
+# P03. Explorando dados de sensores industriais
 
-Análise exploratória de um ano de telemetria de **100 máquinas industriais**, com o objetivo
-de responder uma pergunta prática de manutenção: **os sensores mudam de comportamento antes
-de uma falha?** Se mudam, manutenção preditiva é viável; se não, a falha é imprevisível a
-partir dos dados disponíveis.
+Análise exploratória de um ano de telemetria de 100 máquinas industriais. A pergunta que guia
+o projeto é simples: os sensores mudam de comportamento antes de uma falha? Se mudam, dá pra
+construir um modelo de manutenção preditiva; se não, a falha é imprevisível a partir desses
+dados.
 
-## Contexto
+## Os dados
 
-Trabalho no papel de analista de uma equipe de confiabilidade. Antes de qualquer modelo, é
-preciso entender os dados: o que os sensores medem, como se comportam em operação normal, com
-que frequência as máquinas falham e se a falha "avisa" antes de acontecer.
+Dataset *Microsoft Azure Predictive Maintenance* (público, Kaggle). É um dataset sintético,
+feito para ensinar manutenção preditiva, então não são dados de uma fábrica real. São cinco
+tabelas ligadas pela máquina (`machineID`) e pelo horário (`datetime`):
 
-## Dados
-
-Dataset *Microsoft Azure Predictive Maintenance* (público, Kaggle) — **sintético, de uso
-didático**. Cinco tabelas relacionadas pela máquina (`machineID`) e pelo horário (`datetime`):
-
-| Tabela | Conteúdo | Volume |
+| Tabela | Conteúdo | Linhas |
 |---|---|---|
-| `PdM_telemetry` | Leitura horária de 4 sensores: tensão, rotação, pressão e vibração | 876 100 linhas |
-| `PdM_errors` | Erros registrados (máquina segue operando) | 3 919 |
-| `PdM_failures` | Falhas de componente (parada + troca) | 761 |
-| `PdM_maint` | Trocas de componente (preventivas e corretivas) | 3 286 |
+| `PdM_telemetry` | Leitura horária de 4 sensores: tensão, rotação, pressão, vibração | 876.100 |
+| `PdM_errors` | Erros registrados (a máquina segue operando) | 3.919 |
+| `PdM_failures` | Falhas de componente (parada e troca) | 761 |
+| `PdM_maint` | Trocas de componente (preventivas e corretivas) | 3.286 |
 | `PdM_machines` | Modelo e idade de cada máquina | 100 |
 
-Os arquivos `.csv` não estão versionados (ver `.gitignore`). Para reproduzir, baixe o dataset
-do Kaggle e coloque os cinco arquivos em `data/`.
+Os `.csv` não estão no repositório (ver `.gitignore`). Para rodar, baixe o dataset do Kaggle e
+coloque os cinco arquivos em `data/`.
 
-## Ferramentas
-
-Python (pandas, NumPy, matplotlib, seaborn), em Jupyter no VS Code.
-
-## Estrutura
-
-```
-notebooks/P03_exploracao_sensores.ipynb   análise completa, seções 1 a 9
-data/                                     CSVs do Kaggle (fora do Git)
-images/                                   figuras exportadas para este README
-```
-
-## Como reproduzir
+## Como rodar
 
 ```bash
 pip install pandas numpy matplotlib seaborn jupyter
 # baixar o dataset do Kaggle e extrair os 5 CSVs em data/
-jupyter notebook notebooks/P03_exploracao_sensores.ipynb   # Run All
+jupyter notebook notebooks/P03_exploracao_sensores.ipynb
 ```
 
-## Principais achados
+## O que a análise mostrou
 
-### 1. Os sensores são estáveis e independentes em operação normal
+### Sensores estáveis e independentes em operação normal
 
-Os quatro sensores têm distribuição aproximadamente normal em torno de um valor de operação,
-e a correlação linear entre eles ao longo de todo o período é praticamente nula — cada um
-carrega informação própria.
+Os quatro sensores têm distribuição perto de uma gaussiana em torno de um valor de operação, e
+a correlação linear entre eles no ano todo é praticamente nula. Cada sensor carrega informação
+própria.
 
-![Distribuição dos sensores](images/02_distribuicao_sensores.png)
+![Distribuição dos sensores](images/sensores_hist.png)
 
-### 2. A confiabilidade depende do modelo, não só da idade
+### A confiabilidade depende do modelo, não só da idade
 
-Normalizando pelo número de máquinas de cada modelo, `model1` e `model2` falham quase o dobro
-de `model3`, apesar da idade média praticamente igual (~12 anos). `model4` tem a menor taxa,
-mas é o mais novo da frota (~9 anos), então esse resultado fica confundido com o efeito da
-idade e não pode ser afirmado.
+Normalizando pelo número de máquinas de cada modelo, o model1 e o model2 falham quase o dobro
+do model3, mesmo com idade média praticamente igual (~12 anos). O model4 tem a menor taxa, mas
+é o mais novo da frota (~9 anos), então esse resultado fica confundido com o efeito da idade e
+não dá pra afirmar.
 
-![Falhas por máquina-ano, por modelo](images/06_falhas_por_modelo.png)
+![Falhas por máquina-ano, por modelo](images/falhas_por_modelo.png)
 
-Outros números: taxa de falha global ≈ **7,6 falhas por máquina-ano**; `comp2` concentra 34 %
-das falhas; 2 máquinas não falharam nenhuma vez no ano e outra falhou 19 vezes; ~77 % das
+Outros números: a taxa de falha é de umas 7,6 por máquina-ano; o `comp2` concentra 34% das
+falhas; duas máquinas passaram o ano sem falhar e outra falhou 19 vezes; cerca de 77% das
 manutenções são preventivas.
 
-### 3. A falha "avisa" — principalmente na vibração
+### A falha avisa antes, principalmente na vibração
 
-Recortando as 48 h antes de uma falha da máquina 1, a **vibração sobe de ~45 para ~70 nas
-últimas 12–18 h** (cerca de 5 desvios-padrão), enquanto pressão e rotação também se deslocam.
-Numa janela de controle do mesmo equipamento, sem falha por perto, tudo permanece plano.
+Recortando as 48 h antes de uma falha da máquina 1, a vibração sai de ~45 e chega a ~70 nas
+últimas 15 h, e a pressão também sobe um pouco. Numa janela de controle da mesma máquina, sem
+falha por perto, tudo fica plano.
 
-![Máquina 1 — 48 h antes da falha](images/07_janela_pre_falha.png)
+![Máquina 1, 48h antes da falha](images/janela_pre_falha.png)
 
-O padrão se confirma no agregado: marcando toda leitura que cai nas 24 h anteriores a
-**qualquer** uma das 761 falhas e comparando com as horas normais, a média dos sensores se
-desloca de forma coordenada — **vibração ↑, rotação ↓, pressão ↑, tensão ↑**, da ordem de meio
-desvio-padrão mesmo diluída na janela inteira.
+O padrão se mantém no agregado. Marcando toda leitura que cai nas 24 h anteriores a qualquer
+uma das 761 falhas e comparando com as horas normais, a média dos sensores desloca de forma
+coordenada: vibração e pressão pra cima, rotação pra baixo, na ordem de meio desvio-padrão
+mesmo diluído na janela inteira.
 
-![Vibração: normal vs. pré-falha](images/09_vibracao_por_grupo.png)
+![Vibração: normal vs. pré-falha](images/vibracao_pre_falha.png)
+
+Os erros também antecipam a falha: 705 das 761 falhas (93%) têm pelo menos um erro registrado
+nas 24 h anteriores, contra os ~80 que cairiam nessa janela se fossem aleatórios.
 
 ## Conclusão
 
-Existe **degradação mensurável e antecipada à falha** neste dataset — sobretudo na vibração,
-começando cerca de um dia antes e se intensificando nas horas finais. Isso torna um modelo de
-manutenção preditiva viável: estatísticas móveis (média e desvio de 24 h) de vibração e
-rotação são candidatas naturais a variáveis de entrada, com horizonte de previsão da ordem de
-12 a 24 horas.
+Existe degradação mensurável e antecipada à falha nesse dataset, sobretudo na vibração,
+começando cerca de um dia antes e se intensificando nas horas finais. Um modelo de manutenção
+preditiva é viável. Como ponto de partida, usaria média e desvio móvel de 24 h da vibração e
+da rotação, mais a contagem de erros recentes, com alvo "vai falhar nas próximas 12 a 24 h".
 
-O próximo passo do portfólio é um pipeline de limpeza para dados de sensores realmente sujos, e
-mais adiante a construção do modelo preditivo em si.
+O próximo projeto do portfólio é um pipeline de limpeza para dados de sensores realmente
+sujos, e mais adiante o modelo preditivo em si.
