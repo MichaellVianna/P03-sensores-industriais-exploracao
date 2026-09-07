@@ -1,5 +1,10 @@
 # P03. Explorando dados de sensores industriais
 
+**Nº 3 de 49 na ordem de execução.** ID do projeto: P03.
+
+**Cursos da Alura a fazer antes deste projeto (todos os que caem aqui na ordem das 4 carreiras):**
+- CD/N1-01 a 03 — Pandas: conhecendo a biblioteca, I/O de arquivos, seleção e agrupamento
+
 Análise exploratória de um ano de telemetria de 100 máquinas industriais. A pergunta que guia
 o projeto é simples: os sensores mudam de comportamento antes de uma falha? Se mudam, dá pra
 construir um modelo de manutenção preditiva; se não, a falha é imprevisível a partir desses
