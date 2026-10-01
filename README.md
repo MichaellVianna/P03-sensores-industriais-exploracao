@@ -1,6 +1,6 @@
 # P03. Explorando dados de sensores industriais
 
-**Nº 3 de 48 na ordem de execução.** ID do projeto: P03.
+**Nº 3 de 37 na ordem de execução.** ID do projeto: P03.
 
 **Cursos da Alura a fazer antes deste projeto (todos os que caem aqui na ordem das 4 carreiras):**
 - CD/N1-01 a 03 - Pandas: conhecendo a biblioteca, I/O de arquivos, seleção e agrupamento
