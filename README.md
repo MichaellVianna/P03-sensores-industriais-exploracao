@@ -84,4 +84,4 @@ preditiva é viável. Como ponto de partida, usaria média e desvio móvel de 24
 da rotação, mais a contagem de erros recentes, com alvo "vai falhar nas próximas 12 a 24 h".
 
 O próximo projeto do portfólio é um pipeline de limpeza para dados de sensores realmente
-sujos, e mais adiante o modelo preditivo em si.
+sujos.
